@@ -1,2 +1,1 @@
 # sample-menu
-# sample-menu

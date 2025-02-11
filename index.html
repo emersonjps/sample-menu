@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cardápio</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      header.header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+        background-color: #4caf50;
+        color: #fff;
+      }
+
+      .title {
+        margin: 0.5rem 0;
+        font-size: 2rem;
+      }
+
+      nav.nav-links {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .category-links {
+        display: flex;
+        gap: 1rem;
+        list-style: none;
+      }
+
+      .category-links li a {
+        text-decoration: none;
+        color: #fff;
+        white-space: nowrap;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+      }
+
+      .category-links li a:hover,
+      .category-links li a.active {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+
+      main {
+        padding: 1rem;
+      }
+
+      section {
+        margin-bottom: 2rem;
+      }
+
+      section h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #4caf50;
+      }
+
+      section ul {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        transition: transform 0.2s, background-color 0.2s;
+      }
+
+      .card:hover {
+        transform: scale(1.01);
+        background-color: #e8f5e9;
+      }
+
+      .card h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
+      }
+
+      .card p {
+        margin: 0.5rem 0;
+        color: #666;
+      }
+
+      .card span {
+        display: block;
+        margin-top: 0.5rem;
+        font-weight: bold;
+        color: #000;
+      }
+
+      .card-actions {
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .card-actions input[type="number"] {
+        width: 60px;
+      }
+
+      .cart {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 300px; /* tamanho fixo */
+        overflow-y: auto;
+        z-index: 1000;
+        cursor: grab;
+      }
+
+      .cart h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+      }
+
+      .cart ul {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1rem;
+      }
+
+      .cart ul li {
+        margin-bottom: 0.5rem;
+      }
+
+      .cart-total {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+      }
+
+      .btn-checkout {
+        display: block;
+        width: 100%;
+        padding: 0.5rem;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .btn-checkout:hover {
+        background-color: #43a047;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .checkout-form {
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .checkout-form h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #4caf50;
+      }
+
+      .checkout-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+
+      .checkout-form input,
+      .checkout-form select {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .checkout-form button {
+        padding: 0.5rem 1rem;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      .checkout-form button:hover {
+        background-color: #43a047;
+      }
+
+      .checkout-form .btn-cancel {
+        background-color: #f44336;
+      }
+
+      .checkout-form .btn-cancel:hover {
+        background-color: #e53935;
+      }
+
+      @media (max-width: 600px) {
+        .title {
+          font-size: 1.5rem;
+        }
+
+        .category-links {
+          gap: 0.5rem;
+        }
+
+        section h2 {
+          font-size: 1.2rem;
+        }
+
+        .cart {
+          width: 90%;
+          left: 5%;
+          right: 5%;
+          top: auto;
+          bottom: 1rem;
+          border-radius: 4px;
+          box-shadow: none;
+          cursor: default;
+          height: auto;
+        }
+
+        .cart-total {
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <h1 class="title">Cardápio</h1>
+      <nav class="nav-links">
+        <ul class="category-links" id="category-links"></ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="Entradas">
+        <h2>Entradas</h2>
+        <ul id="Entradas-list"></ul>
+      </section>
+
+      <section id="Pratos-Principais" class="hidden">
+        <h2>Pratos Principais</h2>
+        <ul id="Pratos-Principais-list"></ul>
+      </section>
+
+      <section id="Sobremesas" class="hidden">
+        <h2>Sobremesas</h2>
+        <ul id="Sobremesas-list"></ul>
+      </section>
+
+      <section id="Bebidas" class="hidden">
+        <h2>Bebidas</h2>
+        <ul id="Bebidas-list"></ul>
+      </section>
+    </main>
+
+    <!-- Carrinho -->
+    <div class="cart" id="cart">
+      <h2>Carrinho</h2>
+      <ul id="cart-items"></ul>
+      <div class="cart-total" id="cart-total">Total: R$ 0.00</div>
+      <button class="btn-checkout" id="btn-checkout">Finalizar Pedido</button>
+    </div>
+
+    <!-- Modal Checkout -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="checkout-form" id="checkout-form">
+        <h2>Finalizar Pedido</h2>
+        <label for="name">Nome Completo</label>
+        <input type="text" id="name" required />
+        <label for="address">Endereço</label>
+        <input type="text" id="address" required />
+        <label for="payment">Forma de Pagamento</label>
+        <select id="payment" required>
+          <option value="credit">Cartão de Crédito</option>
+          <option value="debit">Cartão de Débito</option>
+          <option value="pix">Pix</option>
+        </select>
+        <div style="display: flex; justify-content: space-between">
+          <button id="confirm-order">Confirmar Pedido</button>
+          <button id="cancel-order" class="btn-cancel">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const categories = [
+          "Entradas",
+          "Pratos Principais",
+          "Sobremesas",
+          "Bebidas",
+        ];
+        const itens = [
+          {
+            category: "Entradas",
+            name: "Bruschetta",
+            price: 15.0,
+            description: "Pão italiano, tomate, manjericão e azeite.",
+          },
+          {
+            category: "Entradas",
+            name: "Carpaccio",
+            price: 20.0,
+            description: "Carpaccio de carne, alcaparras, mostarda e limão.",
+          },
+          {
+            category: "Entradas",
+            name: "Salada Caprese",
+            price: 18.0,
+            description: "Tomate, mussarela de búfala, manjericão e azeite.",
+          },
+          {
+            category: "Entradas",
+            name: "Bolinho de Bacalhau",
+            price: 22.0,
+            description:
+              "Bolinhos de bacalhau fritos, servidos com molho tártaro.",
+          },
+          {
+            category: "Entradas",
+            name: "Sopa de Abóbora",
+            price: 16.0,
+            description:
+              "Sopa cremosa de abóbora com gengibre e um toque de creme de leite.",
+          },
+          {
+            category: "Entradas",
+            name: "Palitos de Queijo",
+            price: 14.0,
+            description:
+              "Queijo empanado e frito, servido com molho de pimenta.",
+          },
+
+          {
+            category: "Pratos Principais",
+            name: "Filé à Parmegiana",
+            price: 50.0,
+            description: "Filé à parmegiana, arroz e fritas.",
+          },
+          {
+            category: "Pratos Principais",
+            name: "Risoto de Camarão",
+            price: 60.0,
+            description: "Risoto de camarão com arroz arbóreo e parmesão.",
+          },
+          {
+            category: "Pratos Principais",
+            name: "Bife à Milanesa",
+            price: 55.0,
+            description: "Bife empanado servido com purê de batatas e salada.",
+          },
+          {
+            category: "Pratos Principais",
+            name: "Lasanha de Berinjela",
+            price: 48.0,
+            description:
+              "Lasanha vegetariana com berinjela, molho de tomate e queijo.",
+          },
+          {
+            category: "Pratos Principais",
+            name: "Strogonoff de Frango",
+            price: 52.0,
+            description:
+              "Strogonoff de frango acompanhado de arroz branco e batata palha.",
+          },
+          {
+            category: "Pratos Principais",
+            name: "Bacalhau à Gomes de Sá",
+            price: 65.0,
+            description:
+              "Bacalhau desfiado com batatas, cebolas, azeitonas e ovos.",
+          },
+          {
+            category: "Pratos Principais",
+            name: "Moqueca de Peixe",
+            price: 70.0,
+            description: "Moqueca de peixe com leite de coco, dendê e coentro.",
+          },
+          {
+            category: "Pratos Principais",
+            name: "Feijoada",
+            price: 55.0,
+            description: "Feijoada completa com carnes, arroz, farofa e couve.",
+          },
+
+          {
+            category: "Sobremesas",
+            name: "Pudim",
+            price: 10.0,
+            description: "Pudim de leite condensado com calda de caramelo.",
+          },
+          {
+            category: "Sobremesas",
+            name: "Torta de Limão",
+            price: 12.0,
+            description: "Torta de limão com merengue.",
+          },
+          {
+            category: "Sobremesas",
+            name: "Mousse de Maracujá",
+            price: 11.0,
+            description: "Mousse leve e aerado de maracujá.",
+          },
+          {
+            category: "Sobremesas",
+            name: "Brownie de Chocolate",
+            price: 13.0,
+            description: "Brownie com nozes, servido com sorvete de creme.",
+          },
+          {
+            category: "Sobremesas",
+            name: "Sorvete Artesanal",
+            price: 9.0,
+            description: "Sorvete feito na hora com ingredientes naturais.",
+          },
+          {
+            category: "Sobremesas",
+            name: "Cheesecake",
+            price: 14.0,
+            description: "Cheesecake cremoso com calda de frutas vermelhas.",
+          },
+
+          {
+            category: "Bebidas",
+            name: "Água",
+            price: 3.0,
+            description: "Água mineral.",
+          },
+          {
+            category: "Bebidas",
+            name: "Refrigerante",
+            price: 5.0,
+            description: "Refrigerante de 350ml.",
+          },
+          {
+            category: "Bebidas",
+            name: "Suco de Laranja",
+            price: 7.0,
+            description: "Suco natural de laranja, sem adição de açúcar.",
+          },
+          {
+            category: "Bebidas",
+            name: "Chá Gelado",
+            price: 6.0,
+            description: "Chá gelado refrescante, aromatizado com limão.",
+          },
+          {
+            category: "Bebidas",
+            name: "Café Expresso",
+            price: 8.0,
+            description: "Café expresso feito na hora.",
+          },
+          {
+            category: "Bebidas",
+            name: "Vinho Tinto",
+            price: 20.0,
+            description: "Taça de vinho tinto selecionado.",
+          },
+          {
+            category: "Bebidas",
+            name: "Vinho Branco",
+            price: 20.0,
+            description: "Taça de vinho branco refrescante.",
+          },
+          {
+            category: "Bebidas",
+            name: "Cerveja Artesanal",
+            price: 12.0,
+            description: "Cerveja artesanal local, servida gelada.",
+          },
+        ];
+
+        let cart = [];
+
+        const categoryLinksContainer =
+          document.getElementById("category-links");
+        const cartItemsContainer = document.getElementById("cart-items");
+        const cartTotalDisplay = document.getElementById("cart-total");
+        const btnCheckout = document.getElementById("btn-checkout");
+        const modalOverlay = document.getElementById("modal-overlay");
+        const btnConfirmOrder = document.getElementById("confirm-order");
+        const btnCancelOrder = document.getElementById("cancel-order");
+        const cartEl = document.getElementById("cart");
+
+        function createNavLinks() {
+          categories.forEach((cat) => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = `#${cat.replace(/ /g, "-")}`;
+            a.textContent = cat;
+            a.addEventListener("click", (event) => {
+              event.preventDefault();
+              showCategory(cat);
+              setActiveLink(a);
+            });
+            li.appendChild(a);
+            categoryLinksContainer.appendChild(li);
+          });
+        }
+
+        function setActiveLink(activeLink) {
+          const links = categoryLinksContainer.querySelectorAll("a");
+          links.forEach((link) => link.classList.remove("active"));
+          activeLink.classList.add("active");
+        }
+
+        function createItem(item) {
+          const li = document.createElement("li");
+          const card = document.createElement("div");
+          card.className = "card";
+
+          const title = document.createElement("h3");
+          title.textContent = item.name;
+
+          const desc = document.createElement("p");
+          desc.textContent = item.description;
+
+          const price = document.createElement("span");
+          price.textContent = `R$ ${item.price.toFixed(2)}`;
+
+          const actions = document.createElement("div");
+          actions.className = "card-actions";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = cart.some((i) => i.name === item.name);
+          checkbox.addEventListener("change", () => {
+            updateCart(item, checkbox.checked, quantityInput.value);
+          });
+
+          const quantityInput = document.createElement("input");
+          quantityInput.type = "number";
+          quantityInput.min = 1;
+          quantityInput.value =
+            cart.find((i) => i.name === item.name)?.quantity || 1;
+          quantityInput.addEventListener("change", () => {
+            if (!checkbox.checked) {
+              checkbox.checked = true;
+            }
+            updateCart(item, checkbox.checked, quantityInput.value);
+          });
+
+          actions.appendChild(checkbox);
+          actions.appendChild(quantityInput);
+
+          card.appendChild(title);
+          card.appendChild(desc);
+          card.appendChild(price);
+          card.appendChild(actions);
+          li.appendChild(card);
+          return li;
+        }
+
+        function showCategory(category) {
+          document.querySelectorAll("main section").forEach((section) => {
+            section.classList.add("hidden");
+          });
+          const sectionId = category.replace(/ /g, "-");
+          const section = document.getElementById(sectionId);
+          if (section) {
+            section.classList.remove("hidden");
+            const list = section.querySelector("ul");
+            list.innerHTML = "";
+            itens
+              .filter((item) => item.category === category)
+              .forEach((item) => {
+                list.appendChild(createItem(item));
+              });
+          }
+        }
+
+        function updateCart(item, isChecked, quantity) {
+          const existingItem = cart.find((i) => i.name === item.name);
+          if (isChecked) {
+            if (existingItem) {
+              existingItem.quantity = parseInt(quantity);
+            } else {
+              cart.push({ ...item, quantity: parseInt(quantity) });
+            }
+          } else {
+            if (existingItem) {
+              cart = cart.filter((i) => i.name !== item.name);
+            }
+          }
+          renderCart();
+        }
+
+        function renderCart() {
+          cartItemsContainer.innerHTML = "";
+          let total = 0;
+          cart.forEach((item) => {
+            const li = document.createElement("li");
+            li.textContent = `${item.name} - ${
+              item.quantity
+            } x R$ ${item.price.toFixed(2)}`;
+            cartItemsContainer.appendChild(li);
+            total += item.price * item.quantity;
+          });
+          cartTotalDisplay.textContent = `Total: R$ ${total.toFixed(2)}`;
+        }
+
+        function showCheckoutForm() {
+          modalOverlay.classList.add("active");
+        }
+
+        function closeCheckoutForm() {
+          modalOverlay.classList.remove("active");
+        }
+
+        function confirmOrder() {
+          const name = document.getElementById("name").value.trim();
+          const address = document.getElementById("address").value.trim();
+          const payment = document.getElementById("payment").value;
+          if (name && address && payment) {
+            alert(
+              `Pedido confirmado!\nNome: ${name}\nEndereço: ${address}\nPagamento: ${payment}`
+            );
+            closeCheckoutForm();
+            cart = [];
+            renderCart();
+            document.getElementById("name").value = "";
+            document.getElementById("address").value = "";
+            document.getElementById("payment").value = "credit";
+            showCategory(categories[0]);
+          } else {
+            alert("Por favor, preencha todos os campos.");
+          }
+        }
+
+        function makeCartDraggable() {
+          let isDragging = false;
+          let offsetX = 0;
+          let offsetY = 0;
+
+          if (window.innerWidth <= 600) {
+            return;
+          }
+
+          cartEl.style.cursor = "grab";
+
+          cartEl.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            cartEl.style.cursor = "grabbing";
+            const rect = cartEl.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            document.addEventListener("mousemove", mouseMoveHandler);
+            document.addEventListener("mouseup", mouseUpHandler);
+          });
+
+          function mouseMoveHandler(e) {
+            if (!isDragging) return;
+
+            let newLeft = e.clientX - offsetX;
+            let newTop = e.clientY - offsetY;
+
+            const cartWidth = cartEl.offsetWidth;
+            const cartHeight = cartEl.offsetHeight;
+
+            if (newLeft < 0) {
+              newLeft = 0;
+            } else if (newLeft + cartWidth > window.innerWidth) {
+              newLeft = window.innerWidth - cartWidth;
+            }
+
+            if (newTop < 0) {
+              newTop = 0;
+            } else if (newTop + cartHeight > window.innerHeight) {
+              newTop = window.innerHeight - cartHeight;
+            }
+
+            cartEl.style.left = newLeft + "px";
+            cartEl.style.top = newTop + "px";
+          }
+
+          function mouseUpHandler() {
+            isDragging = false;
+            cartEl.style.cursor = "grab";
+            document.removeEventListener("mousemove", mouseMoveHandler);
+            document.removeEventListener("mouseup", mouseUpHandler);
+          }
+        }
+
+        btnCheckout.addEventListener("click", showCheckoutForm);
+        btnConfirmOrder.addEventListener("click", confirmOrder);
+        btnCancelOrder.addEventListener("click", closeCheckoutForm);
+
+        createNavLinks();
+        showCategory(categories[0]);
+        makeCartDraggable();
+
+        window.addEventListener("resize", () => {
+          if (window.innerWidth <= 600) {
+            cartEl.style.top = "";
+            cartEl.style.left = "";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
